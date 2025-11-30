@@ -829,7 +829,7 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	if( FAILED( pCockpitVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
 		return;
 	old_leftwheel = (front_left_amount_below_road>>6);
-	float Wide = wideScreen?40.f:0.f;
+	float Wide = wideScreen ? 40.0f : 0.0f;
 	float X1 = (Wide+31.f)*2*scaleX, X2 = ((Wide+31.f)*2+2*24.0f)*scaleX;
 	float Y1 = (480.0f-56.0f*2.4f-20*2.4f)*scaleY, Y2 = (480.0f-20*2.4f)*scaleY;
 	Y1-=old_leftwheel*scaleY;
@@ -860,15 +860,15 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	AddQuad(pVertices, Wide*2*scaleX+0.0f, 153.f*2.4f*scaleY, (640.0f+Wide*2.f)*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitBottom2:eCockpitBottom, 0,1);
 	if (new_damage) {
 		// cracking... width is 238, offset is 41 (in 320x200 screen space)
-		float dam = new_damage; if (dam>238) dam=238;
-		X1 = (Wide+41.0f)*2.0f*scaleX; X2 = (Wide+41.0f+dam)*2.0f*scaleX;
-		Y1 = 0.0f; Y2 = 0.0f+8.0f*2.4f*scaleY;
-		AddQuad(pVertices, X1, Y1, X2, Y2, 0.91f, (bSuperLeague)?eCracking2:eCracking, 0, dam/238.0f);
+		float dam = (float)new_damage; if (dam>238) dam=238;
+		float damX1 = (Wide+41.0f)*2.0f*scaleX, damX2 = (Wide+41.0f+dam)*2.0f*scaleX;
+		float damY1 = 0.0f, damY2 = 0.0f+8.0f*2.4f*scaleY;
+		AddQuad(pVertices, damX1, damY1, damX2, damY2, 0.91f, (bSuperLeague)?eCracking2:eCracking, 0, dam/238.0f);
 	}
 	for (int i=0; i<nholes; i++) {
-		X1 = (Wide+47.0f+24.0f*i)*2*scaleX; X2 = X1 + 12.0f*2.0f*scaleX;
-		Y1 = 0.0f; Y2 = 0.0f+8.0f*2.4f*scaleY;
-		AddQuad(pVertices, X1, Y1, X2, Y2, 0.95f, (bSuperLeague)?eHole2:eHole, 0,1);
+		float holeX1 = (Wide+47.0f+24.0f*i)*2*scaleX, holeX2 = holeX1 + 12.0f*2.0f*scaleX;
+		float holeY1 = 0.0f, holeY2 = 0.0f+8.0f*2.4f*scaleY;
+		AddQuad(pVertices, holeX1, holeY1, holeX2, holeY2, 0.95f, (bSuperLeague)?eHole2:eHole, 0,1);
 	}
 
 	pCockpitVB->Unlock();
@@ -876,11 +876,11 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	// Prepare speedbar
 	if (old_speedbar != CalculateDisplaySpeed()) {
 		old_speedbar = CalculateDisplaySpeed();
-		TRANSFORMEDCOLVERTEX *pVertices;
-		if( FAILED( pSpeedBarCB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+		TRANSFORMEDCOLVERTEX *pSpeedVertices;
+		if( FAILED( pSpeedBarCB->Lock( 0, 0, (void**)&pSpeedVertices, 0 ) ) )
 			return;
-		float X1 = (Wide*2.f+196.0f)*scaleX, X2 = (Wide*2.f+196.0f + ((old_speedbar > 240) ? (old_speedbar-240) : old_speedbar)/240.0f*242.0f)*scaleX;
-		float Y1 = (480.0f-61.0f)*scaleY, Y2=(480.0f-61.0f+3.0f)*scaleY;
+		float speedX1 = (Wide*2.f+196.0f)*scaleX, speedX2 = (Wide*2.f+196.0f + ((old_speedbar > 240) ? (old_speedbar-240) : old_speedbar)/240.0f*242.0f)*scaleX;
+		float speedY1 = (480.0f-61.0f)*scaleY, speedY2=(480.0f-61.0f+3.0f)*scaleY;
 #ifdef linux
 #define SPEEDCOL1 0xff00ffff	// ABGR
 #define SPEEDCOL2 0xff00ccff	// ABGR
@@ -888,10 +888,10 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 #define SPEEDCOL1 0xffffff00	// ARGB
 #define SPEEDCOL2 0xffffcc00	// ARGB
 #endif
-		pVertices[0].x = X1; pVertices[0].y = Y1; pVertices[0].z = 1.0f; pVertices[0].rhw = 1.0f; pVertices[0].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
-		pVertices[1].x = X2; pVertices[1].y = Y1; pVertices[1].z = 1.0f; pVertices[1].rhw = 1.0f; pVertices[1].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
-		pVertices[2].x = X2; pVertices[2].y = Y2; pVertices[2].z = 1.0f; pVertices[2].rhw = 1.0f; pVertices[2].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
-		pVertices[3].x = X1; pVertices[3].y = Y2; pVertices[3].z = 1.0f; pVertices[3].rhw = 1.0f; pVertices[3].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[0].x = speedX1; pSpeedVertices[0].y = speedY1; pSpeedVertices[0].z = 1.0f; pSpeedVertices[0].rhw = 1.0f; pSpeedVertices[0].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[1].x = speedX2; pSpeedVertices[1].y = speedY1; pSpeedVertices[1].z = 1.0f; pSpeedVertices[1].rhw = 1.0f; pSpeedVertices[1].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[2].x = speedX2; pSpeedVertices[2].y = speedY2; pSpeedVertices[2].z = 1.0f; pSpeedVertices[2].rhw = 1.0f; pSpeedVertices[2].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[3].x = speedX1; pSpeedVertices[3].y = speedY2; pSpeedVertices[3].z = 1.0f; pSpeedVertices[3].rhw = 1.0f; pSpeedVertices[3].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
 		pSpeedBarCB->Unlock();
 	}
 

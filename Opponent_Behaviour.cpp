@@ -1252,7 +1252,7 @@ static void AverageWheelYSpeeds( long wheel1, long wheel2 )
 	opp_y_speed[wheel2] = average;
 }
 
-static long Opponent_Speed_Value( long TrackID, long pos )
+static long Opponent_Speed_Value( long track_id, long pos )
 {
 /*srd111a	move.l	#road.section.angle.and.piece,a1
 	move.b	(a1,d1.w),d0
@@ -1288,16 +1288,16 @@ srd114	move.l	#opponents.speed.values,a1
 	static long oldtrack = -1;
 	static bool oldleague = false;
 	static long oldspeed = 0;
-	if(pos==oldpos && oldtrack==TrackID && oldleague==bSuperLeague)
+	if(pos==oldpos && oldtrack==track_id && oldleague==bSuperLeague)
 		return oldspeed;
 	oldpos = pos;
 	oldleague = bSuperLeague;
-	oldtrack = TrackID;
+	oldtrack = track_id;
 
 	long b = Piece_Angle_And_Template[pos];
 	b = sections_car_can_be_put_on[b&0x0f];
-	long B63ce1 = (long)rand() & (long)opp_track_speed_values[TrackID+16+(bSuperLeague?32:0)];
-		 B63ce1 += (long)opp_track_speed_values[TrackID+24+(bSuperLeague?32:0)];
+	long B63ce1 = (long)rand() & (long)opp_track_speed_values[track_id+16+(bSuperLeague?32:0)];
+		 B63ce1 += (long)opp_track_speed_values[track_id+24+(bSuperLeague?32:0)];
 	long /*value,*/ d0;
 	if (b<0) {
 		//value = B63ce1-10;

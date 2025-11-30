@@ -872,14 +872,14 @@ static void CarControl (DWORD input)
 
 
 static void BoostPower (long boost_flag,
-						long accelerate,
-						long brake)
+						long accel_flag,
+						long brake_flag)
 	{
 	boost_activated = 0;
 
 	if ((! boost_flag) && (NOT_WRECKED))
 		{
-		if (accelerating || (accelerate || brake))
+		if (accelerating || (accel_flag || brake_flag))
 			{
 			if (boostReserve > 0)
 				{
@@ -1997,24 +1997,24 @@ set.wheel.rotation.speed :-
 		}
 	return;
 */
-static void SetOneWheelRotationSpeed(long touching_road, long player_z_speed, long *wheel_rotation_speed)
+static void SetOneWheelRotationSpeed(long wheel_touching_road, long wheel_z_speed, long *wheel_rotation_speed)
 {
-	if(touching_road == 0) 
+	if(wheel_touching_road == 0) 
 	{
 		// Not touching road, so reduce wheel speed by one quarter
 		long reduction = (*wheel_rotation_speed) / 4;
 		*wheel_rotation_speed -= reduction;
 		return;
 	}
-	if(abs(player_z_speed) < 0x800)
+	if(abs(wheel_z_speed) < 0x800)
 		{
 		// multiply by 8 and use as wheel speed
-		*wheel_rotation_speed = abs(player_z_speed) * 8;
+		*wheel_rotation_speed = abs(wheel_z_speed) * 8;
 		}
 	else
 		{
 		// double it, add $3000 and use as wheel speed
-		*wheel_rotation_speed = (abs(player_z_speed) * 2) + 0x3000;
+		*wheel_rotation_speed = (abs(wheel_z_speed) * 2) + 0x3000;
 		if (*wheel_rotation_speed > 0xffff)
 			*wheel_rotation_speed = 0xff00;		// set to maximum value
 		}
