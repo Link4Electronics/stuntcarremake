@@ -1016,7 +1016,10 @@ HRESULT CreatePolygonVertexBuffer (IDirect3DDevice9 *pd3dDevice)
 	{
 		if( FAILED( pd3dDevice->CreateVertexBuffer( MAX_POLY_SIDES*sizeof(TRANSFORMEDVERTEX),
 				D3DUSAGE_WRITEONLY, D3DFVF_TRANSFORMEDVERTEX, D3DPOOL_DEFAULT, &pPolygonVB, NULL ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to create polygon vertex buffer\n");
 			return E_FAIL;
+		}
 	}
 
 	return S_OK;
@@ -1042,7 +1045,10 @@ TRANSFORMEDVERTEX *pVertices;
 		return;
 
 	if( FAILED( pPolygonVB->Lock( 0, sides*sizeof(TRANSFORMEDVERTEX), (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock polygon vertex buffer\n");
 		return;
+	}
 
     for (i = 0; i < sides; i++)
         {

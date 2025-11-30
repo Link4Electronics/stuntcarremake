@@ -1941,7 +1941,10 @@ DWORD colour;
 
 	UTVERTEX *pVertices;
 	if( FAILED( pShadowVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock shadow vertex buffer for drawing\n");
 		return;
+	}
 
 	/*
 	// Calculate surface normal
@@ -2189,12 +2192,18 @@ HRESULT CreateShadowVertexBuffer (IDirect3DDevice9 *pd3dDevice)
 	{
 		if( FAILED( pd3dDevice->CreateVertexBuffer( MAX_VERTICES_PER_SHADOW*sizeof(UTVERTEX),
 				D3DUSAGE_WRITEONLY, D3DFVF_UTVERTEX, D3DPOOL_DEFAULT, &pShadowVB, NULL ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to create shadow vertex buffer\n");
 			return E_FAIL;
+		}
 	}
 
 	UTVERTEX *pVertices;
 	if( FAILED( pShadowVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock shadow vertex buffer\n");
 		return E_FAIL;
+	}
 
 	numShadowVertices = 0;
 
@@ -2214,12 +2223,18 @@ HRESULT CreateTrackVertexBuffer (IDirect3DDevice9 *pd3dDevice)
 	{
 		if( FAILED( pd3dDevice->CreateVertexBuffer( MAX_VERTICES_PER_TRACK*sizeof(UTVERTEX),
 				D3DUSAGE_WRITEONLY, D3DFVF_UTVERTEX, D3DPOOL_DEFAULT, &pTrackVB, NULL ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to create track vertex buffer\n");
 			return E_FAIL;
+		}
 	}
 
 	UTVERTEX *pVertices;
 	if( FAILED( pTrackVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock track vertex buffer\n");
 		return E_FAIL;
+	}
 
 	SetSegmentTextures();
 
@@ -2281,7 +2296,10 @@ long savedTrackVertices = trackVertices;
 	// Simpler just to lock the whole VB
 	UTVERTEX *pVertices;
 	if( FAILED( pTrackVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock track vertex buffer for update\n");
 		return E_FAIL;
+	}
 	for (face = LEFT_SIDE; face < NUM_TRACK_FACES; face++)
 	{
 		firstVertex = PieceFirstVertex[face][piece];

@@ -612,20 +612,38 @@ HRESULT CALLBACK OnResetDevice( IDirect3DDevice9 *pd3dDevice,
     V_RETURN( D3DXCreateSprite( pd3dDevice, &g_pSprite ) );
 
 	if (FAILED(D3DXCreateTextureFromResource(pd3dDevice, NULL, L"ATLAS", &g_pAtlas)))
+	{
+		OutputDebugStringW(L"ERROR: Failed to create texture from ATLAS resource\n");
 		return E_FAIL;
+	}
 
 	InitAtlasCoord();
 
-	if (CreatePolygonVertexBuffer(pd3dDevice) != S_OK)
-		return E_FAIL;
-	if (CreateTrackVertexBuffer(pd3dDevice) != S_OK)
-		return E_FAIL;
-	if (CreateShadowVertexBuffer(pd3dDevice) != S_OK)
-		return E_FAIL;
-	if (CreateCarVertexBuffer(pd3dDevice) != S_OK)
-		return E_FAIL;
-	if (CreateCockpitVertexBuffer(pd3dDevice) != S_OK)
-		return E_FAIL;
+	if ((hr = CreatePolygonVertexBuffer(pd3dDevice)) != S_OK)
+	{
+		OutputDebugStringW(L"ERROR: Failed to create polygon vertex buffer\n");
+		return hr;
+	}
+	if ((hr = CreateTrackVertexBuffer(pd3dDevice)) != S_OK)
+	{
+		OutputDebugStringW(L"ERROR: Failed to create track vertex buffer\n");
+		return hr;
+	}
+	if ((hr = CreateShadowVertexBuffer(pd3dDevice)) != S_OK)
+	{
+		OutputDebugStringW(L"ERROR: Failed to create shadow vertex buffer\n");
+		return hr;
+	}
+	if ((hr = CreateCarVertexBuffer(pd3dDevice)) != S_OK)
+	{
+		OutputDebugStringW(L"ERROR: Failed to create car vertex buffer\n");
+		return hr;
+	}
+	if ((hr = CreateCockpitVertexBuffer(pd3dDevice)) != S_OK)
+	{
+		OutputDebugStringW(L"ERROR: Failed to create cockpit vertex buffer\n");
+		return hr;
+	}
 
 	// Set the projection transform (view and world are updated per frame)
     D3DXMATRIX matProj;

@@ -1983,7 +1983,7 @@ set.wheel.rotation.speed :-
 		}
 
 	// touching road
-	if (abs(players.z.speed) < 0x800)
+	if (abs(players.z.speed) < WHEEL_SPEED_LOW_THRESHOLD)
 		{
 		// multiply by 8 and use as wheel speed
 		wheel.rotation.speed = abs(players.z.speed) * 8;
@@ -1991,9 +1991,9 @@ set.wheel.rotation.speed :-
 	else
 		{
 		// double it, add $3000 and use as wheel speed
-		wheel.rotation.speed = (abs(players.z.speed) * 2) + 0x3000;
-		if (wheel.rotation.speed > 0xffff)
-			wheel.rotation.speed = 0xff00;		// set to maximum value
+		wheel.rotation.speed = (abs(players.z.speed) * 2) + WHEEL_SPEED_HIGH_OFFSET;
+		if (wheel.rotation.speed > WHEEL_SPEED_MAX)
+			wheel.rotation.speed = WHEEL_SPEED_MAX_CLAMPED;		// set to maximum value
 		}
 	return;
 */
@@ -2006,7 +2006,7 @@ static void SetOneWheelRotationSpeed(long wheel_touching_road, long wheel_z_spee
 		*wheel_rotation_speed -= reduction;
 		return;
 	}
-	if(abs(wheel_z_speed) < 0x800)
+	if(abs(wheel_z_speed) < WHEEL_SPEED_LOW_THRESHOLD)
 		{
 		// multiply by 8 and use as wheel speed
 		*wheel_rotation_speed = abs(wheel_z_speed) * 8;
@@ -2014,9 +2014,9 @@ static void SetOneWheelRotationSpeed(long wheel_touching_road, long wheel_z_spee
 	else
 		{
 		// double it, add $3000 and use as wheel speed
-		*wheel_rotation_speed = (abs(wheel_z_speed) * 2) + 0x3000;
-		if (*wheel_rotation_speed > 0xffff)
-			*wheel_rotation_speed = 0xff00;		// set to maximum value
+		*wheel_rotation_speed = (abs(wheel_z_speed) * 2) + WHEEL_SPEED_HIGH_OFFSET;
+		if (*wheel_rotation_speed > WHEEL_SPEED_MAX)
+			*wheel_rotation_speed = WHEEL_SPEED_MAX_CLAMPED;		// set to maximum value
 		}
 }
 
@@ -2624,7 +2624,7 @@ static void CalculateSteering (void)
 	pos_difference_angle = abs(y_angle_difference);
 
 	// Save a scaled positive difference angle ranging from 0 to $7fff
-	if (pos_difference_angle < 0x800)
+	if (pos_difference_angle < WHEEL_SPEED_LOW_THRESHOLD)
 		scaled_pos_difference_angle = pos_difference_angle << 4;
 	else
 		scaled_pos_difference_angle = 0x7fff;	// set to maximum
@@ -3801,8 +3801,8 @@ fwe3	move.w	sprite.DMA.value,dmacon+custom
 */
 // wheel update
 
-leftwheel_angle = (leftwheel_angle+front_left_wheel_speed)&0xfffff;
-rightwheel_angle = (leftwheel_angle+front_right_wheel_speed)&0xfffff;
+leftwheel_angle = (leftwheel_angle+front_left_wheel_speed)&WHEEL_ANGLE_MASK;
+rightwheel_angle = (leftwheel_angle+front_right_wheel_speed)&WHEEL_ANGLE_MASK;
 
 int period, index;
 DWORD freq;

@@ -697,12 +697,18 @@ HRESULT CreateCarVertexBuffer (IDirect3DDevice9 *pd3dDevice)
 	{
 		if( FAILED( pd3dDevice->CreateVertexBuffer( MAX_VERTICES_PER_CAR*sizeof(UTVERTEX),
 				D3DUSAGE_WRITEONLY, D3DFVF_UTVERTEX, D3DPOOL_DEFAULT, &pCarVB, NULL ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to create car vertex buffer\n");
 			return E_FAIL;
+		}
 	}
 
 	UTVERTEX *pVertices;
 	if( FAILED( pCarVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock car vertex buffer\n");
 		return E_FAIL;
+	}
 	numCarVertices = 0;
 	CreateCarInVB(pVertices);
 	pCarVB->Unlock();
@@ -758,13 +764,19 @@ HRESULT CreateCockpitVertexBuffer (IDirect3DDevice9 *pd3dDevice)
 	{
 		if( FAILED( pd3dDevice->CreateVertexBuffer( MAX_COCKIPTVB*sizeof(TRANSFORMEDTEXVERTEX),
 				D3DUSAGE_WRITEONLY, D3DFVF_TRANSFORMEDTEXVERTEX, D3DPOOL_DEFAULT, &pCockpitVB, NULL ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to create cockpit vertex buffer\n");
 			return E_FAIL;
+		}
 	}
 	if (pSpeedBarCB == NULL)
 	{
 		if ( FAILED( pd3dDevice->CreateVertexBuffer( 4*sizeof(TRANSFORMEDCOLVERTEX),
 				D3DUSAGE_WRITEONLY, D3DFVF_TRANSFORMEDCOLVERTEX, D3DPOOL_DEFAULT, &pSpeedBarCB, NULL ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to create speed bar vertex buffer\n");
 			return E_FAIL;
+		}
 	}
 	return S_OK;
 }
@@ -827,17 +839,20 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	TRANSFORMEDTEXVERTEX *pVertices;
 	cockpit_vtx = 0;
 	if( FAILED( pCockpitVB->Lock( 0, 0, (void**)&pVertices, 0 ) ) )
+	{
+		OutputDebugStringW(L"ERROR: Failed to lock cockpit vertex buffer\n");
 		return;
+	}
 	old_leftwheel = (front_left_amount_below_road>>6);
-	float Wide = wideScreen ? 40.0f : 0.0f;
-	float X1 = (Wide+31.f)*2*scaleX, X2 = ((Wide+31.f)*2+2*24.0f)*scaleX;
-	float Y1 = (480.0f-56.0f*2.4f-20*2.4f)*scaleY, Y2 = (480.0f-20*2.4f)*scaleY;
+	float Wide = wideScreen ? COCKPIT_WIDESCREEN_OFFSET : 0.0f;
+	float X1 = (Wide+COCKPIT_WHEEL_LEFT_OFFSET)*2*scaleX, X2 = ((Wide+COCKPIT_WHEEL_LEFT_OFFSET)*2+2*COCKPIT_WHEEL_WIDTH)*scaleX;
+	float Y1 = (480.0f-COCKPIT_WHEEL_HEIGHT*2.4f-COCKPIT_WHEEL_BOTTOM_GAP*2.4f)*scaleY, Y2 = (480.0f-COCKPIT_WHEEL_BOTTOM_GAP*2.4f)*scaleY;
 	Y1-=old_leftwheel*scaleY;
 	Y2-=old_leftwheel*scaleY;
 	AddQuad(pVertices, X1, Y1, X2, Y2, 0.8f, eWheel0+(leftwheel_angle>>16)%6, 0,1);
 	old_rightwheel = (front_right_amount_below_road>>6);
-	X1 = (Wide*2.f+640.f-31.f*2.f - 24.f*2)*scaleX, X2 = (Wide*2.f+640.f-31.f*2.f)*scaleX;
-	Y1 = (480.0f-56.0f*2.4f-20*2.4f)*scaleY, Y2 = (480.0f-20*2.4f)*scaleY;
+	X1 = (Wide*2.f+640.f-COCKPIT_WHEEL_LEFT_OFFSET*2.f - COCKPIT_WHEEL_WIDTH*2)*scaleX, X2 = (Wide*2.f+640.f-COCKPIT_WHEEL_LEFT_OFFSET*2.f)*scaleX;
+	Y1 = (480.0f-COCKPIT_WHEEL_HEIGHT*2.4f-COCKPIT_WHEEL_BOTTOM_GAP*2.4f)*scaleY, Y2 = (480.0f-COCKPIT_WHEEL_BOTTOM_GAP*2.4f)*scaleY;
 	Y1-=old_rightwheel*scaleY;
 	Y2-=old_rightwheel*scaleY;
 	AddQuad(pVertices, X1, Y1, X2, Y2, 0.8f, eWheel0+(rightwheel_angle>>16)%6, 1,1);
@@ -850,24 +865,24 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 		engineFrame = eEngineFlames0 + engineframes[frame>>1];
 	}
 	if(wideScreen) {
-		AddQuad(pVertices, 0.0f, 99.f*2.4f*scaleY, 40.f*2.f*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitWL2:eCockpitWL, 0,1);
-		AddQuad(pVertices, (800.f-82.f)*scaleX, 98.f*2.4f*scaleY, 800.f*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitWR2:eCockpitWR, 0,1);
+		AddQuad(pVertices, 0.0f, COCKPIT_WLEFT_Y_OFFSET*2.4f*scaleY, COCKPIT_WLEFT_X_OFFSET*2.f*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitWL2:eCockpitWL, 0,1);
+		AddQuad(pVertices, (800.f-COCKPIT_WRIGHT_X_OFFSET)*scaleX, COCKPIT_WRIGHT_Y_OFFSET*2.4f*scaleY, 800.f*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitWR2:eCockpitWR, 0,1);
 	}
-	AddQuad(pVertices, (Wide+42.0f)*2.0f*scaleX, 123.0f*2.4f*scaleY, (Wide+42.0f+235.0f)*2.0f*scaleX, (123.f+35.0f)*2.4f*scaleY, 0.89f, engineFrame, 0,1);
-	AddQuad(pVertices, (Wide+41.f)*2.f*scaleX, 0.0f, (Wide+41.f+238.f)*2.f*scaleX, 16.f*2.4f*scaleY, 0.9f, (bSuperLeague)?eCockpitTop2:eCockpitTop, 0,1);
-	AddQuad(pVertices, Wide*2.f*scaleX+0.0f, 0.0f, (Wide+41.f)*2.f*scaleX, 153.f*2.4f*scaleY, 0.9f, (bSuperLeague)?eCockpitLeft2:eCockpitLeft, 0,1);
-	AddQuad(pVertices, (Wide+279.f)*2.f*scaleX, 0.0f, (640.0f+Wide*2.f)*scaleX, 153.f*2.4f*scaleY, 0.9f, (bSuperLeague)?eCockpitRight2:eCockpitRight, 0,1);
-	AddQuad(pVertices, Wide*2*scaleX+0.0f, 153.f*2.4f*scaleY, (640.0f+Wide*2.f)*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitBottom2:eCockpitBottom, 0,1);
+	AddQuad(pVertices, (Wide+COCKPIT_ENGINE_X_OFFSET)*2.0f*scaleX, COCKPIT_ENGINE_Y_OFFSET*2.4f*scaleY, (Wide+COCKPIT_ENGINE_X_OFFSET+COCKPIT_ENGINE_WIDTH)*2.0f*scaleX, (COCKPIT_ENGINE_Y_OFFSET+COCKPIT_ENGINE_HEIGHT)*2.4f*scaleY, 0.89f, engineFrame, 0,1);
+	AddQuad(pVertices, (Wide+COCKPIT_TOP_X_OFFSET)*2.f*scaleX, 0.0f, (Wide+COCKPIT_TOP_X_OFFSET+COCKPIT_TOP_WIDTH)*2.f*scaleX, COCKPIT_TOP_HEIGHT*2.4f*scaleY, 0.9f, (bSuperLeague)?eCockpitTop2:eCockpitTop, 0,1);
+	AddQuad(pVertices, Wide*2.f*scaleX+0.0f, 0.0f, (Wide+COCKPIT_TOP_X_OFFSET)*2.f*scaleX, COCKPIT_SIDE_HEIGHT*2.4f*scaleY, 0.9f, (bSuperLeague)?eCockpitLeft2:eCockpitLeft, 0,1);
+	AddQuad(pVertices, (Wide+COCKPIT_RIGHT_X_OFFSET)*2.f*scaleX, 0.0f, (640.0f+Wide*2.f)*scaleX, COCKPIT_SIDE_HEIGHT*2.4f*scaleY, 0.9f, (bSuperLeague)?eCockpitRight2:eCockpitRight, 0,1);
+	AddQuad(pVertices, Wide*2*scaleX+0.0f, COCKPIT_SIDE_HEIGHT*2.4f*scaleY, (640.0f+Wide*2.f)*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitBottom2:eCockpitBottom, 0,1);
 	if (new_damage) {
 		// cracking... width is 238, offset is 41 (in 320x200 screen space)
-		float dam = (float)new_damage; if (dam>238) dam=238;
-		float damX1 = (Wide+41.0f)*2.0f*scaleX, damX2 = (Wide+41.0f+dam)*2.0f*scaleX;
-		float damY1 = 0.0f, damY2 = 0.0f+8.0f*2.4f*scaleY;
-		AddQuad(pVertices, damX1, damY1, damX2, damY2, 0.91f, (bSuperLeague)?eCracking2:eCracking, 0, dam/238.0f);
+		float dam = (float)new_damage; if (dam>COCKPIT_TOP_WIDTH) dam=COCKPIT_TOP_WIDTH;
+		float damX1 = (Wide+COCKPIT_TOP_X_OFFSET)*2.0f*scaleX, damX2 = (Wide+COCKPIT_TOP_X_OFFSET+dam)*2.0f*scaleX;
+		float damY1 = 0.0f, damY2 = 0.0f+COCKPIT_DAMAGE_HEIGHT*2.4f*scaleY;
+		AddQuad(pVertices, damX1, damY1, damX2, damY2, 0.91f, (bSuperLeague)?eCracking2:eCracking, 0, dam/COCKPIT_TOP_WIDTH);
 	}
 	for (int i=0; i<nholes; i++) {
-		float holeX1 = (Wide+47.0f+24.0f*i)*2*scaleX, holeX2 = holeX1 + 12.0f*2.0f*scaleX;
-		float holeY1 = 0.0f, holeY2 = 0.0f+8.0f*2.4f*scaleY;
+		float holeX1 = (Wide+COCKPIT_HOLE_X_OFFSET+COCKPIT_HOLE_SPACING*i)*2*scaleX, holeX2 = holeX1 + COCKPIT_HOLE_WIDTH*2.0f*scaleX;
+		float holeY1 = 0.0f, holeY2 = 0.0f+COCKPIT_DAMAGE_HEIGHT*2.4f*scaleY;
 		AddQuad(pVertices, holeX1, holeY1, holeX2, holeY2, 0.95f, (bSuperLeague)?eHole2:eHole, 0,1);
 	}
 
@@ -878,9 +893,12 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 		old_speedbar = CalculateDisplaySpeed();
 		TRANSFORMEDCOLVERTEX *pSpeedVertices;
 		if( FAILED( pSpeedBarCB->Lock( 0, 0, (void**)&pSpeedVertices, 0 ) ) )
+		{
+			OutputDebugStringW(L"ERROR: Failed to lock speed bar vertex buffer\n");
 			return;
-		float speedX1 = (Wide*2.f+196.0f)*scaleX, speedX2 = (Wide*2.f+196.0f + ((old_speedbar > 240) ? (old_speedbar-240) : old_speedbar)/240.0f*242.0f)*scaleX;
-		float speedY1 = (480.0f-61.0f)*scaleY, speedY2=(480.0f-61.0f+3.0f)*scaleY;
+		}
+		float speedX1 = (Wide*2.f+COCKPIT_SPEEDBAR_X_OFFSET)*scaleX, speedX2 = (Wide*2.f+COCKPIT_SPEEDBAR_X_OFFSET + ((old_speedbar > COCKPIT_SPEEDBAR_MAX) ? (old_speedbar-COCKPIT_SPEEDBAR_MAX) : old_speedbar)/(float)COCKPIT_SPEEDBAR_MAX*COCKPIT_SPEEDBAR_WIDTH)*scaleX;
+		float speedY1 = (480.0f-COCKPIT_SPEEDBAR_Y_OFFSET)*scaleY, speedY2=(480.0f-COCKPIT_SPEEDBAR_Y_OFFSET+COCKPIT_SPEEDBAR_HEIGHT)*scaleY;
 #ifdef linux
 #define SPEEDCOL1 0xff00ffff	// ABGR
 #define SPEEDCOL2 0xff00ccff	// ABGR
@@ -888,10 +906,10 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 #define SPEEDCOL1 0xffffff00	// ARGB
 #define SPEEDCOL2 0xffffcc00	// ARGB
 #endif
-		pSpeedVertices[0].x = speedX1; pSpeedVertices[0].y = speedY1; pSpeedVertices[0].z = 1.0f; pSpeedVertices[0].rhw = 1.0f; pSpeedVertices[0].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
-		pSpeedVertices[1].x = speedX2; pSpeedVertices[1].y = speedY1; pSpeedVertices[1].z = 1.0f; pSpeedVertices[1].rhw = 1.0f; pSpeedVertices[1].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
-		pSpeedVertices[2].x = speedX2; pSpeedVertices[2].y = speedY2; pSpeedVertices[2].z = 1.0f; pSpeedVertices[2].rhw = 1.0f; pSpeedVertices[2].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
-		pSpeedVertices[3].x = speedX1; pSpeedVertices[3].y = speedY2; pSpeedVertices[3].z = 1.0f; pSpeedVertices[3].rhw = 1.0f; pSpeedVertices[3].color = (old_speedbar > 240)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[0].x = speedX1; pSpeedVertices[0].y = speedY1; pSpeedVertices[0].z = 1.0f; pSpeedVertices[0].rhw = 1.0f; pSpeedVertices[0].color = (old_speedbar > COCKPIT_SPEEDBAR_MAX)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[1].x = speedX2; pSpeedVertices[1].y = speedY1; pSpeedVertices[1].z = 1.0f; pSpeedVertices[1].rhw = 1.0f; pSpeedVertices[1].color = (old_speedbar > COCKPIT_SPEEDBAR_MAX)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[2].x = speedX2; pSpeedVertices[2].y = speedY2; pSpeedVertices[2].z = 1.0f; pSpeedVertices[2].rhw = 1.0f; pSpeedVertices[2].color = (old_speedbar > COCKPIT_SPEEDBAR_MAX)?SPEEDCOL2:SPEEDCOL1;
+		pSpeedVertices[3].x = speedX1; pSpeedVertices[3].y = speedY2; pSpeedVertices[3].z = 1.0f; pSpeedVertices[3].rhw = 1.0f; pSpeedVertices[3].color = (old_speedbar > COCKPIT_SPEEDBAR_MAX)?SPEEDCOL2:SPEEDCOL1;
 		pSpeedBarCB->Unlock();
 	}
 
