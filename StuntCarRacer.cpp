@@ -302,6 +302,15 @@ static void FreeData( void )
 /*	Description:	Provide screen width and height											*/
 /*	======================================================================================= */
 
+/*	======================================================================================= */
+/*	Function:		GetScreenDimensions															*/
+/*																									*/
+/*	Description:	Retrieve current screen/backbuffer width and height					*/
+/*																									*/
+/*	Parameters:		screen_width  - Output: current screen width in pixels				*/
+/*					screen_height - Output: current screen height in pixels				*/
+/*	======================================================================================= */
+
 void GetScreenDimensions( long *screen_width,
 						  long *screen_height )
 	{
@@ -487,12 +496,21 @@ GLuint   g_pSprite = 0;	// Texture for batching text calls
 ID3DXFont *g_pFont = NULL;         // Font for drawing text
 ID3DXFont *g_pFontLarge = NULL;    // Font for drawing large text
 
+/*	======================================================================================= */
+/*	Function:		GetTextScale															*/
+/*																									*/
+/*	Description:	Calculate text scaling factor based on current vs base resolution		*/
+/*					Used to scale font sizes and text positions for different window sizes	*/
+/*																									*/
+/*	Returns:		Scaling factor (1.0 = base resolution, 2.0 = double size, etc.)		*/
+/*	======================================================================================= */
+
 // Helper function to get text scale based on current resolution
 float GetTextScale()
 {
 	long current_width, current_height;
 	GetScreenDimensions(&current_width, &current_height);
-	float base_width = wideScreen ? 800.0f : 640.0f;
+	float base_width = wideScreen ? (float)BASE_WIDTH_WIDESCREEN : (float)BASE_WIDTH_STANDARD;
 	return (float)current_width / base_width;
 }
 ID3DXSprite *g_pSprite = NULL;       // Sprite for batching draw text calls
@@ -1354,15 +1372,15 @@ void RenderText( double fTime )
 			txtHelper.SetForegroundColor( D3DXCOLOR( 0.0f, 0.0f, 0.0f, 1.0f ) );
 			
 			// Position text using base 800x480 coordinates, then scale
-			float base_height = 480.0f;
+			float base_height = (float)BASE_HEIGHT;
 			float scaleY = (float)pd3dsdBackBuffer->Height / base_height;
 			
 			// Boost text - positioned in top dashboard box
-			txtHelper.SetInsertionPos( (int)((88+(wideScreen?80:0)) * textScale), (int)((480.0f - 48.0f) * scaleY) );
+			txtHelper.SetInsertionPos( (int)((88+(wideScreen?80:0)) * textScale), (int)((BASE_HEIGHT - 48.0f) * scaleY) );
 			txtHelper.DrawFormattedTextLine( L"L" STRING L"       B%02d", lapText, boostReserve );
 			
 			// Distance text - positioned in bottom dashboard box
-			txtHelper.SetInsertionPos( (int)((84+(wideScreen?80:0)) * textScale), (int)((480.0f - 25.0f) * scaleY) );
+			txtHelper.SetInsertionPos( (int)((84+(wideScreen?80:0)) * textScale), (int)((BASE_HEIGHT - 25.0f) * scaleY) );
 			txtHelper.DrawFormattedTextLine( L"        %+05d", CalculateOpponentsDistance() );
 
 			txtHelper.End();

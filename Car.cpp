@@ -818,8 +818,8 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	// Get current screen dimensions and calculate scale factors
 	long current_width, current_height;
 	GetScreenDimensions(&current_width, &current_height);
-	float base_width = wideScreen ? 800.0f : 640.0f;
-	float base_height = 480.0f;
+	float base_width = wideScreen ? (float)BASE_WIDTH_WIDESCREEN : (float)BASE_WIDTH_STANDARD;
+	float base_height = (float)BASE_HEIGHT;
 	float scaleX = (float)current_width / base_width;
 	float scaleY = (float)current_height / base_height;
 	
