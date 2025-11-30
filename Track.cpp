@@ -1317,9 +1317,9 @@ long ConvertAmigaTrack( long track )
 		{
 		// store x,y,z of piece's cube
 		c = Piece_X_Z_Position[piece];
-		x = (long)c & 0x0f;
+		x = static_cast<long>(c) & 0x0f;
 		y = 0;
-		z = ((long)c & 0xf0) >> 4;
+		z = (static_cast<long>(c) & 0xf0) >> 4;
 		Track[piece].x = x;
 		Track[piece].y = y;
 		Track[piece].z = z;
@@ -1331,9 +1331,9 @@ long ConvertAmigaTrack( long track )
 
 		// get piece template information
 		c = Piece_Angle_And_Template[piece];
-		templateNum = (long)c & 0x0f;
-		roughAngle = (long)c & 0xc0;
-		reverseOrder = (long)c & 0x10;
+		templateNum = static_cast<long>(c) & 0x0f;
+		roughAngle = static_cast<long>(c) & 0xc0;
+		reverseOrder = static_cast<long>(c) & 0x10;
 
 		Track[piece].roughPieceAngle = (roughAngle * MAX_ANGLE) / 0x100;
 		Track[piece].oppositeDirection = (reverseOrder == 0 ? FALSE : TRUE);
@@ -1355,7 +1355,7 @@ long ConvertAmigaTrack( long track )
 
 
 		// store initial road lines colour
-		Track[piece].initialColour = ((long)Right_Y_Coordinate_ID[piece] & 0x80) >> 7;
+		Track[piece].initialColour = (static_cast<long>(Right_Y_Coordinate_ID[piece]) & 0x80) >> 7;
 
 
 		// decide road/side surface colours
@@ -1460,11 +1460,11 @@ long ConvertAmigaTrack( long track )
 
 
 		// store piece y using IDs and overall shifts
-		leftID = (long)Left_Y_Coordinate_ID[piece] & 0x7f;
-		rightID = (long)Right_Y_Coordinate_ID[piece] & 0x7f;
+		leftID = static_cast<long>(Left_Y_Coordinate_ID[piece]) & 0x7f;
+		rightID = static_cast<long>(Right_Y_Coordinate_ID[piece]) & 0x7f;
 
-		leftOverallShift = (long)Left_Overall_Y_Shift[piece];
-		rightOverallShift = (long)Right_Overall_Y_Shift[piece];
+		leftOverallShift = static_cast<long>(Left_Overall_Y_Shift[piece]);
+		rightOverallShift = static_cast<long>(Right_Overall_Y_Shift[piece]);
 
 		for (i = 0; i < numCoords; i++)
 			{
@@ -1664,13 +1664,13 @@ static void ConvertAmigaPieceXZ( unsigned char *amiga,
 		high = (char)*amiga++;
 
 		value = ((high & 0xff) << 8) | (low & 0xff);
-		x = (long)value;
+		x = static_cast<long>(value);
 
 		low = (char)*amiga++;
 		high = (char)*amiga++;
 
 		value = ((high & 0xff) << 8) | (low & 0xff);
-		z = (long)value;
+		z = static_cast<long>(value);
 
 		dest->x = x;
 		dest->z = z;
@@ -1705,7 +1705,7 @@ static void ConvertAmigaPieceY( AMIGA_PIECE_Y *amiga,
 			low = *yptr++;
 
 			value = ((high & 0x7f) << 8) | (low & 0xff);
-			y = (long)value;
+			y = static_cast<long>(value);
 
 			dest->y = y;
 			dest++;
@@ -1715,7 +1715,7 @@ static void ConvertAmigaPieceY( AMIGA_PIECE_Y *amiga,
 		{
 		for (i = 0; i < number; i++)
 			{
-			ya = yb = (long)*yptr++ & 0xff;
+			ya = yb = static_cast<long>(*yptr++) & 0xff;
 
 			ya <<= 1;
 			ya &= 0xe0;
@@ -1828,7 +1828,7 @@ D3DXVECTOR3 v;
 	y += piece_y;
 	z += piece_z;
 
-	v = D3DXVECTOR3( (float)x, (float)y, (float)z );
+	v = D3DXVECTOR3( static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) );
 	return(v);
 }
 
@@ -2589,8 +2589,8 @@ static void UpdateDrawBridgeYCoords( long piece,
 	{
 	long i, j, leftOverallShift, rightOverallShift, y;
 
-	leftOverallShift = (long)Left_Overall_Y_Shift[piece];
-	rightOverallShift = (long)Right_Overall_Y_Shift[piece];
+	leftOverallShift = static_cast<long>(Left_Overall_Y_Shift[piece]);
+	rightOverallShift = static_cast<long>(Right_Overall_Y_Shift[piece]);
 
 	for (i = firstCoord, j = firstYIndex; i <= lastCoord; i++, j += direction)
 		{
@@ -2703,8 +2703,8 @@ static long ReadAmigaTrackData( long track )
 
 	// transfer track data into final locations
 	i = 0;
-	NumTrackPieces = (long)buffer[i++] & 0xff;
-	PlayersStartPiece = (long)buffer[i++] & 0xff;
+	NumTrackPieces = static_cast<long>(buffer[i++]) & 0xff;
+	PlayersStartPiece = static_cast<long>(buffer[i++]) & 0xff;
 	StartLinePiece = PlayersStartPiece;
 	HalfALapPiece = StartLinePiece + NumTrackPieces/2;
 	if (HalfALapPiece > NumTrackPieces) HalfALapPiece -= NumTrackPieces;
@@ -2738,8 +2738,8 @@ static long ReadAmigaTrackData( long track )
 		Right_Overall_Y_Shift[j] = s;
 		}
 
-	StandardBoost = (long)buffer[i++] & 0xff;
-	SuperBoost = (long)buffer[i++] & 0xff;
+	StandardBoost = static_cast<long>(buffer[i++]) & 0xff;
+	SuperBoost = static_cast<long>(buffer[i++]) & 0xff;
 	return(TRUE);
 	}
 

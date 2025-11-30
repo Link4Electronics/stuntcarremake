@@ -98,12 +98,12 @@ static void MakeCarWheels( COORD_3D *cptr,
 
 	// start of code
 	angle = PI/11;
-	step = ((double)2 * (double)PI) / (double)num_edges;
+	step = (static_cast<double>(2) * static_cast<double>(PI)) / static_cast<double>(num_edges);
 
 	for ( i = 0; i < num_edges; i++ )
 		{
-		y = (long)(cos( angle ) * (double)wheel_radius);
-		z = (long)(sin( angle ) * (double)wheel_radius);
+		y = static_cast<long>(cos( angle ) * static_cast<double>(wheel_radius));
+		z = static_cast<long>(sin( angle ) * static_cast<double>(wheel_radius));
 		angle += step;
 
 		if (angle > (2 * PI))
@@ -538,9 +538,9 @@ D3DXVECTOR3 v1, v2, v3;//, edge1, edge2, surface_normal;
 		return;
 	}
 
-	v1 = D3DXVECTOR3( (float)c1->x, (float)c1->y, (float)c1->z );
-	v2 = D3DXVECTOR3( (float)c2->x, (float)c2->y, (float)c2->z );
-	v3 = D3DXVECTOR3( (float)c3->x, (float)c3->y, (float)c3->z );
+	v1 = D3DXVECTOR3( static_cast<float>(c1->x), static_cast<float>(c1->y), static_cast<float>(c1->z) );
+	v2 = D3DXVECTOR3( static_cast<float>(c2->x), static_cast<float>(c2->y), static_cast<float>(c2->z) );
+	v3 = D3DXVECTOR3( static_cast<float>(c3->x), static_cast<float>(c3->y), static_cast<float>(c3->z) );
 
 	/*
 	// Calculate surface normal
@@ -830,10 +830,10 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	// Get current screen dimensions and calculate scale factors
 	long current_width, current_height;
 	GetScreenDimensions(&current_width, &current_height);
-	float base_width = wideScreen ? (float)BASE_WIDTH_WIDESCREEN : (float)BASE_WIDTH_STANDARD;
-	float base_height = (float)BASE_HEIGHT;
-	float scaleX = (float)current_width / base_width;
-	float scaleY = (float)current_height / base_height;
+	float base_width = wideScreen ? static_cast<float>(BASE_WIDTH_WIDESCREEN) : static_cast<float>(BASE_WIDTH_STANDARD);
+	float base_height = static_cast<float>(BASE_HEIGHT);
+	float scaleX = static_cast<float>(current_width) / base_width;
+	float scaleY = static_cast<float>(current_height) / base_height;
 	
 	// Prepare Cockpit drawing
 	TRANSFORMEDTEXVERTEX *pVertices;
@@ -875,7 +875,7 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 	AddQuad(pVertices, Wide*2*scaleX+0.0f, COCKPIT_SIDE_HEIGHT*2.4f*scaleY, (640.0f+Wide*2.f)*scaleX, 480.0f*scaleY, 0.9f, (bSuperLeague)?eCockpitBottom2:eCockpitBottom, 0,1);
 	if (new_damage) {
 		// cracking... width is 238, offset is 41 (in 320x200 screen space)
-		float dam = (float)new_damage; if (dam>COCKPIT_TOP_WIDTH) dam=COCKPIT_TOP_WIDTH;
+		float dam = static_cast<float>(new_damage); if (dam>COCKPIT_TOP_WIDTH) dam=COCKPIT_TOP_WIDTH;
 		float damX1 = (Wide+COCKPIT_TOP_X_OFFSET)*2.0f*scaleX, damX2 = (Wide+COCKPIT_TOP_X_OFFSET+dam)*2.0f*scaleX;
 		float damY1 = 0.0f, damY2 = 0.0f+COCKPIT_DAMAGE_HEIGHT*2.4f*scaleY;
 		AddQuad(pVertices, damX1, damY1, damX2, damY2, 0.91f, (bSuperLeague)?eCracking2:eCracking, 0, dam/COCKPIT_TOP_WIDTH);
@@ -897,7 +897,7 @@ void DrawCockpit (IDirect3DDevice9 *pd3dDevice)
 			OutputDebugStringW(L"ERROR: Failed to lock speed bar vertex buffer\n");
 			return;
 		}
-		float speedX1 = (Wide*2.f+COCKPIT_SPEEDBAR_X_OFFSET)*scaleX, speedX2 = (Wide*2.f+COCKPIT_SPEEDBAR_X_OFFSET + ((old_speedbar > COCKPIT_SPEEDBAR_MAX) ? (old_speedbar-COCKPIT_SPEEDBAR_MAX) : old_speedbar)/(float)COCKPIT_SPEEDBAR_MAX*COCKPIT_SPEEDBAR_WIDTH)*scaleX;
+		float speedX1 = (Wide*2.f+COCKPIT_SPEEDBAR_X_OFFSET)*scaleX, speedX2 = (Wide*2.f+COCKPIT_SPEEDBAR_X_OFFSET + ((old_speedbar > COCKPIT_SPEEDBAR_MAX) ? (old_speedbar-COCKPIT_SPEEDBAR_MAX) : old_speedbar)/static_cast<float>(COCKPIT_SPEEDBAR_MAX)*COCKPIT_SPEEDBAR_WIDTH)*scaleX;
 		float speedY1 = (480.0f-COCKPIT_SPEEDBAR_Y_OFFSET)*scaleY, speedY2=(480.0f-COCKPIT_SPEEDBAR_Y_OFFSET+COCKPIT_SPEEDBAR_HEIGHT)*scaleY;
 #ifdef linux
 #define SPEEDCOL1 0xff00ffff	// ABGR
