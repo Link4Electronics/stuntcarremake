@@ -486,6 +486,15 @@ GLuint   g_pSprite = 0;	// Texture for batching text calls
 #else
 ID3DXFont *g_pFont = NULL;         // Font for drawing text
 ID3DXFont *g_pFontLarge = NULL;    // Font for drawing large text
+
+// Helper function to get text scale based on current resolution
+float GetTextScale()
+{
+	long current_width, current_height;
+	GetScreenDimensions(&current_width, &current_height);
+	float base_width = wideScreen ? 800.0f : 640.0f;
+	return (float)current_width / base_width;
+}
 ID3DXSprite *g_pSprite = NULL;       // Sprite for batching draw text calls
 #endif
 
@@ -535,12 +544,13 @@ HRESULT CALLBACK OnCreateDevice( IDirect3DDevice9 *pd3dDevice, const D3DSURFACE_
 //    V_RETURN( g_DialogResourceManager.OnCreateDevice( pd3dDevice ) );
 //    V_RETURN( g_SettingsDlg.OnCreateDevice( pd3dDevice ) );
 
-    // Initialize the fonts
-    V_RETURN( D3DXCreateFont( pd3dDevice, 15, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
+    // Initialize the fonts with scaled sizes
+	float textScale = GetTextScale();
+    V_RETURN( D3DXCreateFont( pd3dDevice, (int)(15 * textScale), 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
                               OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
                               L"Arial", &g_pFont ) );
 
-    V_RETURN( D3DXCreateFont( pd3dDevice, 25, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
+    V_RETURN( D3DXCreateFont( pd3dDevice, (int)(25 * textScale), 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
                               OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
                               L"Arial", &g_pFontLarge ) );
 
@@ -559,10 +569,26 @@ HRESULT CALLBACK OnResetDevice( IDirect3DDevice9 *pd3dDevice,
 //    V_RETURN( g_DialogResourceManager.OnResetDevice() );
 //    V_RETURN( g_SettingsDlg.OnResetDevice() );
 
-    if( g_pFont )
-        V_RETURN( g_pFont->OnResetDevice() );
-    if( g_pFontLarge )
-        V_RETURN( g_pFontLarge->OnResetDevice() );
+    // Recreate fonts with proper scaling for new resolution
+	if( g_pFont )
+	{
+		g_pFont->Release();
+		g_pFont = NULL;
+	}
+	if( g_pFontLarge )
+	{
+		g_pFontLarge->Release();
+		g_pFontLarge = NULL;
+	}
+	
+	float textScale = GetTextScale();
+	V_RETURN( D3DXCreateFont( pd3dDevice, (int)(15 * textScale), 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
+	                          OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+	                          L"Arial", &g_pFont ) );
+	
+	V_RETURN( D3DXCreateFont( pd3dDevice, (int)(25 * textScale), 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
+	                          OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+	                          L"Arial", &g_pFontLarge ) );
 
     // Create a sprite to help batch calls when drawing many lines of text
     V_RETURN( D3DXCreateSprite( pd3dDevice, &g_pSprite ) );
@@ -1139,7 +1165,8 @@ static void HandleTrackMenu( CDXUTTextHelper &txtHelper )
 	{
 	long i, track_number;
 	UINT firstMenuOption, lastMenuOption;
-	txtHelper.SetInsertionPos( 2+(wideScreen?10:0), 15*8 );
+	float textScale = GetTextScale();
+	txtHelper.SetInsertionPos( (int)((2+(wideScreen?10:0)) * textScale), (int)(15*8*textScale) );
 	txtHelper.DrawTextLine( L"Choose track :-" );
 
 	for (i = 0, firstMenuOption = FIRSTMENU; i < NUM_TRACKS; i++)
@@ -1150,7 +1177,7 @@ static void HandleTrackMenu( CDXUTTextHelper &txtHelper )
 
 	// output instructions
 	const D3DSURFACE_DESC *pd3dsdBackBuffer = DXUTGetBackBufferSurfaceDesc();
-	txtHelper.SetInsertionPos( 2+(wideScreen?10:0), pd3dsdBackBuffer->Height-15*8 );
+	txtHelper.SetInsertionPos( (int)((2+(wideScreen?10:0)) * textScale), (int)(pd3dsdBackBuffer->Height-15*8*textScale) );
 	txtHelper.DrawFormattedTextLine( L"Current track - " STRING L".  Press 'S' to select, Escape to quit", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)));
 	txtHelper.DrawTextLine( L"'L' to switch Super League On/Off");
 
@@ -1208,17 +1235,18 @@ static void HandleTrackPreview( CDXUTTextHelper &txtHelper )
 	{
 	// output instructions
 	const D3DSURFACE_DESC *pd3dsdBackBuffer = DXUTGetBackBufferSurfaceDesc();
-	txtHelper.SetInsertionPos( 2+(wideScreen?10:0), pd3dsdBackBuffer->Height-15*9 );
+	float textScale = GetTextScale();
+	txtHelper.SetInsertionPos( (int)((2+(wideScreen?10:0)) * textScale), (int)(pd3dsdBackBuffer->Height-15*9*textScale) );
 	txtHelper.DrawFormattedTextLine( L"Selected track - " STRING L".  Press 'S' to start game", (TrackID == NO_TRACK ? L"None" : GetTrackName(TrackID)));
 	txtHelper.DrawTextLine( L"'M' for track menu, Escape to quit");
 	txtHelper.DrawTextLine( L"(Press F4 to change scenery, F9 / F10 to adjust frame rate)" );
 
-	txtHelper.SetInsertionPos( 2+(wideScreen?10:0), pd3dsdBackBuffer->Height-15*6 );
+	txtHelper.SetInsertionPos( (int)((2+(wideScreen?10:0)) * textScale), (int)(pd3dsdBackBuffer->Height-15*6*textScale) );
 	txtHelper.DrawTextLine( L"Keyboard controls during game :-" );
 	#if defined(PANDORA) || defined(PYRA)
 	txtHelper.DrawTextLine( L"  DPad = Steer, (X) = Accelerate, (B) = Brake, (R) = Nitro" );
 	#else
-	txtHelper.DrawTextLine( L"  S = Steer left, D = Steer right, Enter = Accelerate, Space = Brake" );
+	txtHelper.DrawTextLine( L"  Arrow left = Steer left, Arrow right = Steer right, Space = Accelerate, Arrow Down = Brake" );
 	#endif
 	txtHelper.DrawTextLine( L"  R = Point car in opposite direction, P = Pause, O = Unpause" );
 	txtHelper.DrawTextLine( L"  M = Back to track menu, Escape = Quit" );
@@ -1268,17 +1296,18 @@ void RenderText( double fTime )
     // and then it calls pFont->DrawText( m_pSprite, strMsg, -1, &rc, DT_NOCLIP, m_clr );
     // If NULL is passed in as the sprite object, then it will work fine however the 
     // pFont->DrawText() will not be batched together.  Batching calls will improve perf.
+	float textScale = GetTextScale();
 #ifdef linux
 	static
 #endif
-    CDXUTTextHelper txtHelper( g_pFont, g_pSprite, 15 );
+    CDXUTTextHelper txtHelper( g_pFont, g_pSprite, (int)(15 * textScale) );
 
     // Output statistics
     txtHelper.Begin();
 	txtHelper.SetForegroundColor( D3DXCOLOR( 1.0f, 1.0f, 0.0f, 1.0f ) );
 	if (bShowStats)
 	{
-		txtHelper.SetInsertionPos( 2+(wideScreen?10:0), 0 );
+		txtHelper.SetInsertionPos( (int)((2+(wideScreen?10:0)) * textScale), 0 );
 #ifndef linux
 		txtHelper.DrawTextLine( DXUTGetFrameStats(true) );
 		txtHelper.DrawTextLine( DXUTGetDeviceStats() );
@@ -1316,20 +1345,25 @@ void RenderText( double fTime )
 			// Output opponent's name for four seconds at race start
 			if (((DXUTGetTime() - gameStartTime) < 4.0) && (opponentsID != NO_OPPONENT))
 			{
-				txtHelper.SetInsertionPos( 250+(wideScreen?80:0), pd3dsdBackBuffer->Height-15*20 );
+				txtHelper.SetInsertionPos( (int)((250+(wideScreen?80:0)) * textScale), (int)(pd3dsdBackBuffer->Height-15*20*textScale) );
 				txtHelper.DrawFormattedTextLine( L"Opponent: " STRING, opponentNames[opponentsID] );
 			}
-			txtHelper.SetInsertionPos( 2+(wideScreen?80:0), pd3dsdBackBuffer->Height-15*2 );
+			txtHelper.SetInsertionPos( (int)((2+(wideScreen?80:0)) * textScale), (int)(pd3dsdBackBuffer->Height-15*2*textScale) );
 			if (lapNumber[PLAYER] > 0)
 				StringCchPrintf( lapText, 3, L"%d", lapNumber[PLAYER] );
 			txtHelper.SetForegroundColor( D3DXCOLOR( 0.0f, 0.0f, 0.0f, 1.0f ) );
-			txtHelper.SetInsertionPos( 75+(wideScreen?80:0), pd3dsdBackBuffer->Height-52 );
-			txtHelper.DrawFormattedTextLine( L"L" STRING L"        B%02d", lapText, boostReserve );
-			if (CalculateOpponentsDistance() >= 0)
-				txtHelper.SetInsertionPos( 72+(wideScreen?80:0), pd3dsdBackBuffer->Height-29 );
-			else
-				txtHelper.SetInsertionPos( 76+(wideScreen?80:0), pd3dsdBackBuffer->Height-29 );
-			txtHelper.DrawFormattedTextLine( L"         %+05d", CalculateOpponentsDistance() );
+			
+			// Position text using base 800x480 coordinates, then scale
+			float base_height = 480.0f;
+			float scaleY = (float)pd3dsdBackBuffer->Height / base_height;
+			
+			// Boost text - positioned in top dashboard box
+			txtHelper.SetInsertionPos( (int)((88+(wideScreen?80:0)) * textScale), (int)((480.0f - 48.0f) * scaleY) );
+			txtHelper.DrawFormattedTextLine( L"L" STRING L"       B%02d", lapText, boostReserve );
+			
+			// Distance text - positioned in bottom dashboard box
+			txtHelper.SetInsertionPos( (int)((84+(wideScreen?80:0)) * textScale), (int)((480.0f - 25.0f) * scaleY) );
+			txtHelper.DrawFormattedTextLine( L"        %+05d", CalculateOpponentsDistance() );
 
 			txtHelper.End();
 
@@ -1338,7 +1372,7 @@ void RenderText( double fTime )
 				#ifdef linux
 				static
 				#endif
-				CDXUTTextHelper txtHelperLarge( g_pFontLarge, g_pSprite, 25 );
+				CDXUTTextHelper txtHelperLarge( g_pFontLarge, g_pSprite, (int)(25 * textScale) );
 
 				txtHelperLarge.Begin();
 
@@ -1356,12 +1390,12 @@ void RenderText( double fTime )
 				if (GameMode == GAME_OVER)
 				{
 #ifdef 	linux
-					txtHelperLarge.SetInsertionPos( 250+(wideScreen?80:0), pd3dsdBackBuffer->Height-25*13 );
+					txtHelperLarge.SetInsertionPos( (int)((250+(wideScreen?80:0)) * textScale), (int)(pd3dsdBackBuffer->Height-25*13*textScale) );
 					txtHelperLarge.DrawTextLine( L"GAME OVER" );
-					txtHelperLarge.SetInsertionPos( 132+(wideScreen?80:0), pd3dsdBackBuffer->Height-25*11 );
+					txtHelperLarge.SetInsertionPos( (int)((132+(wideScreen?80:0)) * textScale), (int)(pd3dsdBackBuffer->Height-25*11*textScale) );
 					txtHelperLarge.DrawTextLine( L"Press 'M' for track menu" );
 #else
-					txtHelperLarge.SetInsertionPos( 124+(wideScreen?80:0), pd3dsdBackBuffer->Height-25*12 );
+					txtHelperLarge.SetInsertionPos( (int)((124+(wideScreen?80:0)) * textScale), (int)(pd3dsdBackBuffer->Height-25*12*textScale) );
 					txtHelperLarge.DrawTextLine( L"GAME OVER: Press 'M' for track menu" );
 #endif
 				}
@@ -1374,7 +1408,7 @@ void RenderText( double fTime )
 					else
 						txtHelperLarge.SetForegroundColor( D3DXCOLOR( 0.0f, 0.0f, 0.0f, 1.0f ) );
 
-					txtHelperLarge.SetInsertionPos( 250+(wideScreen?80:0), pd3dsdBackBuffer->Height-25*12 );
+					txtHelperLarge.SetInsertionPos( (int)((250+(wideScreen?80:0)) * textScale), (int)(pd3dsdBackBuffer->Height-25*12*textScale) );
 
 					if (raceWon)
 						txtHelperLarge.DrawTextLine( L"RACE WON" );
@@ -1821,7 +1855,18 @@ INT WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     DXUTInit( true, true, true, false ); // Parse the command line, handle the default hotkeys, show msgboxes, don't handle Alt-Enter
     DXUTSetCursorSettings( true, true ); // Show the cursor and clip it when in full screen
     DXUTCreateWindow( maintitle );
-    DXUTCreateDevice( D3DADAPTER_DEFAULT, true, 800, 480, IsDeviceAcceptable, ModifyDeviceSettings );
+	
+	// Get screen resolution and set initial window size to roughly half
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	int initialWidth = screenWidth / 2;
+	int initialHeight = screenHeight / 2;
+	// Maintain 16:10 aspect ratio
+	if (initialWidth * 10 != initialHeight * 16) {
+		initialHeight = (initialWidth * 10) / 16;
+	}
+	
+    DXUTCreateDevice( D3DADAPTER_DEFAULT, true, initialWidth, initialHeight, IsDeviceAcceptable, ModifyDeviceSettings );
 	wideScreen = 1;
 
 //	DXUTSetConstantFrameTime( true, 0.033f );	// Doesn't seem to work
