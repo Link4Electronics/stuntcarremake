@@ -1569,7 +1569,43 @@ HRESULT hr;
 LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, 
                           bool *pbNoFurtherProcessing, void *pUserContext )
 {
-    return 0;
+	// Handle window resizing to preserve aspect ratio
+	if (uMsg == WM_SIZING)
+	{
+		RECT* pRect = (RECT*)lParam;
+		int width = pRect->right - pRect->left;
+		int height = pRect->bottom - pRect->top;
+		
+		// Preserve aspect ratio based on wideScreen setting
+		// wideScreen=1 means 16:10 (800:480), wideScreen=0 would be 4:3
+		float targetAspect = wideScreen ? (800.0f / 480.0f) : (4.0f / 3.0f);
+		float currentAspect = (float)width / (float)height;
+		
+		// Adjust based on which edge is being dragged
+		if (currentAspect > targetAspect)
+		{
+			// Too wide, adjust width
+			int newWidth = (int)(height * targetAspect);
+			if (wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT)
+				pRect->left = pRect->right - newWidth;
+			else
+				pRect->right = pRect->left + newWidth;
+		}
+		else if (currentAspect < targetAspect)
+		{
+			// Too tall, adjust height
+			int newHeight = (int)(width / targetAspect);
+			if (wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT)
+				pRect->top = pRect->bottom - newHeight;
+			else
+				pRect->bottom = pRect->top + newHeight;
+		}
+		
+		*pbNoFurtherProcessing = true;
+		return 0;
+	}
+	
+	return 0;
 }
 
 //--------------------------------------------------------------------------------------
