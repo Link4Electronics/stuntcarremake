@@ -879,4 +879,6 @@ void DXUTReset3DEnvironment();
 #define ZeroMemory(a, b) memset(a, 0, b)
 #define CopyMemory(a, b, c) memcpy(a, b, c)
 
+#define OutputDebugStringW(A) printf("%S", A)
+
 #endif //_DX_LINUX_H_
