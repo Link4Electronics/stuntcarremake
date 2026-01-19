@@ -2170,6 +2170,9 @@ int main(int argc, const char** argv)
 	int fullscreen = 0;
 	int desktop = 0;
 	int givehelp = 0;
+	int customWidth = 0;
+	int customHeight = 0;
+	float customScale = 0.0f;
 
 	for (int i=1; i<argc; i++) {
 		if(!strcmp(argv[i], "-f"))
@@ -2184,10 +2187,37 @@ int main(int argc, const char** argv)
 			nomsaa = 1;
 		else if(!strcmp(argv[i], "--nomsaa"))
 			nomsaa = 1;
+		else if((!strcmp(argv[i], "-w") || !strcmp(argv[i], "--width")) && i+1 < argc) {
+			customWidth = atoi(argv[++i]);
+			if(customWidth <= 0) {
+				printf("Error: Invalid width value\n");
+				givehelp = 1;
+			}
+		}
+		else if((!strcmp(argv[i], "-h") || !strcmp(argv[i], "--height")) && i+1 < argc) {
+			customHeight = atoi(argv[++i]);
+			if(customHeight <= 0) {
+				printf("Error: Invalid height value\n");
+				givehelp = 1;
+			}
+		}
+		else if((!strcmp(argv[i], "-s") || !strcmp(argv[i], "--scale")) && i+1 < argc) {
+			customScale = static_cast<float>(atof(argv[++i]));
+			if(customScale <= 0.0f) {
+				printf("Error: Invalid scale value\n");
+				givehelp = 1;
+			}
+		}
 		else givehelp = 1;
 	}
 	if(givehelp) {
-		printf("Unrecognized parameter.\nOptions are:\n\t-f|--fullscreen\tUse fullscreen\n\t-n|--nomsaa\tDisable MSAA\n");
+		printf("Unrecognized parameter.\nOptions are:\n");
+		printf("\t-f|--fullscreen\t\tUse fullscreen\n");
+		printf("\t-d|--desktop\t\tUse desktop fullscreen\n");
+		printf("\t-n|--nomsaa\t\tDisable MSAA\n");
+		printf("\t-w|--width <pixels>\tSet window width (e.g., 640, 800, 1280)\n");
+		printf("\t-h|--height <pixels>\tSet window height (e.g., 480, 600, 720)\n");
+		printf("\t-s|--scale <factor>\tSet scale factor (e.g., 1.0, 1.5, 2.0)\n");
 		exit(0);
 	}
 
@@ -2247,7 +2277,11 @@ int main(int argc, const char** argv)
 #endif
 	screenW = 480; screenH = 272;
 #else
-	if(desktop || fullscreen) {
+	// Use custom dimensions if provided
+	if(customWidth > 0 && customHeight > 0) {
+		screenW = customWidth;
+		screenH = customHeight;
+	} else if(desktop || fullscreen) {
 #ifdef USE_SDL2
 		flags |= (desktop)?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_FULLSCREEN;
 #else
@@ -2255,20 +2289,20 @@ int main(int argc, const char** argv)
 #endif
 		if(desktop) {
 #ifdef USE_SDL2
-			screenW = 640;
-			screenH = 480;
+			screenW = customWidth > 0 ? customWidth : 640;
+			screenH = customHeight > 0 ? customHeight : 480;
 #else
 			const SDL_VideoInfo* infos = SDL_GetVideoInfo();
-			screenW = infos->current_w;
-			screenH = infos->current_h;
+			screenW = customWidth > 0 ? customWidth : infos->current_w;
+			screenH = customHeight > 0 ? customHeight : infos->current_h;
 #endif
 		} else {
-			screenW = 640;
-			screenH = 480;
+			screenW = customWidth > 0 ? customWidth : 640;
+			screenH = customHeight > 0 ? customHeight : 480;
 		}
 	} else {
-		screenW = 800;
-		screenH = 480;
+		screenW = customWidth > 0 ? customWidth : 800;
+		screenH = customHeight > 0 ? customHeight : 480;
 	}
 #endif
 #ifdef USE_SDL2
@@ -2335,19 +2369,28 @@ int main(int argc, const char** argv)
 	}
 	SDL_WM_SetCaption(maintitle, NULL);
 #endif
-	// automatic guess the scale
+	// automatic guess the scale or use custom scale
 	float screenScale = 1.;
-	if(screenW/640. < screenH/480.)
-		screenScale = screenW/640.;
-	else
-		screenScale = screenH/480.;
-	// is it a Wide screen ration?
+	if(customScale > 0.0f) {
+		// Use custom scale factor
+		screenScale = customScale;
+	} else {
+		// Automatic scaling based on window size
+		if(screenW/640. < screenH/480.)
+			screenScale = screenW/640.;
+		else
+			screenScale = screenH/480.;
+	}
+	// is it a Wide screen ratio?
+	// Detect widescreen if width is significantly wider than 4:3 aspect ratio
 	if((screenW/screenScale - 640)>=80)
 		wideScreen=1;
 	screenX = (screenW-(wideScreen?800.:640.)*screenScale)/2.;
 	screenY = (screenH-480.*screenScale)/2.;
 	screenW = (wideScreen?800:640)*screenScale;
 	screenH = 480*screenScale;
+	printf("Display mode: %s, Scale: %.2f, Resolution: %dx%d\n",
+		   wideScreen ? "Widescreen" : "Standard", screenScale, screenW, screenH);
 #ifdef USE_SDL2
 	if(flags&SDL_WINDOW_FULLSCREEN || flags&SDL_WINDOW_FULLSCREEN_DESKTOP)
 #else
